@@ -1,20 +1,21 @@
 import React, { useState } from "react";
-import OtpInput from "../../components/common/OtpInput";
-import { validateReset } from "../../utils/validation";
 import { useToast } from "../../components/common/Toast";
-import "./ForgotPassword.css";
+import { validateReset } from "../../utils/validation";
+import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
-
-const API = "http://localhost:3001/api/auth";
+import { useNavigate } from "react-router-dom";
+import OtpInput from "../../components/common/OtpInput";
+import { apiClient } from "../../utils/axiosConfig";
 
 function ForgotPassword() {
   const { show } = useToast();
+  const navigate = useNavigate();
   const [values, setValues] = useState({ email: "", otp: "", newPassword: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
-  const [sendingOtp, setSendingOtp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,16 +30,13 @@ function ForgotPassword() {
     if (!values.email) { setErrors((e)=>({...e,email:"Vui lòng nhập email"})); return; }
     setSendingOtp(true);
     try {
-      const res = await fetch(`${API}/send-otp-reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Gửi OTP thất bại");
+      await apiClient.post('/auth/send-otp-reset-password', 
+        { email: values.email }
+      );
       show("Đã gửi OTP đến email", "success");
     } catch (err) {
-      show(err.message, "error");
+      const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
+      show(message, "error");
     } finally {
       setSendingOtp(false);
     }
@@ -51,16 +49,12 @@ function ForgotPassword() {
     if (Object.keys(validation).length > 0) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Đặt lại mật khẩu thất bại");
+      await apiClient.post('/auth/reset-password', values);
       show("Đặt lại mật khẩu thành công", "success");
+      navigate("/login");
     } catch (err) {
-      show(err.message, "error");
+      const message = err.response?.data?.message || err.message || "Đặt lại mật khẩu thất bại";
+      show(message, "error");
     } finally {
       setSubmitting(false);
     }

@@ -4,7 +4,7 @@ import HomePage from "./pages/common/HomePage";
 import Register from "./pages/common/Register";
 import Login from "./pages/common/Login";
 import ForgotPassword from "./pages/common/ForgotPassword";
-import AdminDashboard from "./components/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
   return (

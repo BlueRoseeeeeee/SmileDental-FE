@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useToast } from "../../components/common/Toast";
 import { validateLogin } from "../../utils/validation";
-import "./auth.css";
+import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
 import { useNavigate } from "react-router-dom";
 import { setAuth } from "../../utils/auth";
-
-const API = "http://localhost:3001/api/auth";
+import { apiClient } from "../../utils/axiosConfig";
 
 function getUserRole(user) {
   if (!user) return "";
@@ -44,20 +43,15 @@ function Login() {
     if (Object.keys(validation).length > 0) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cleaned),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || 'Đăng nhập thất bại');
+      const { data } = await apiClient.post('/auth/login', cleaned);
 
       setAuth({ accessToken: data.accessToken, user: data.user });
       const role = getUserRole(data.user);
       show("Đăng nhập thành công", "success");
       navigate(roleToPath[role] || '/');
     } catch (err) {
-      show(err.message || "Đăng nhập thất bại", "error");
+      const message = err.response?.data?.message || err.message || "Đăng nhập thất bại";
+      show(message, "error");
     } finally { setSubmitting(false); }
   };
 

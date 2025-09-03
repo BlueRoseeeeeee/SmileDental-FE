@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import OtpInput from "../../components/common/OtpInput";
 import { normalizeVietnameseName, validateRegister } from "../../utils/validation";
 import { useToast } from "../../components/common/Toast";
-import "./Register.css";
+import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
 import { Link , useNavigate} from "react-router-dom";
-
-const API = "http://localhost:3001/api/auth";
+import { apiClient } from "../../utils/axiosConfig";
 
 function range(start, end) { return Array.from({length: end-start+1}, (_,i)=>start+i); }
 
@@ -56,16 +55,13 @@ function Register() {
     if (errors.email) return;
     setSendingOtp(true);
     try {
-      const res = await fetch(`${API}/send-otp-register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Gửi OTP thất bại");
+      await apiClient.post('/auth/send-otp-register', 
+        { email: values.email }
+      );
       show("Đã gửi OTP đến email", "success");
     } catch (err) {
-      show(err.message, "error");
+      const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
+      show(message, "error");
     } finally {
       setSendingOtp(false);
     }
@@ -90,18 +86,14 @@ function Register() {
         dateOfBirth: `${values.year}-${String(values.month).padStart(2,'0')}-${String(values.day).padStart(2,'0')}`,
         otp: values.otp,
       };
-      const res = await fetch(`${API}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Đăng ký thất bại");
+             await apiClient.post('/auth/register', payload);
       show("Đăng ký thành công", "success");
-      navigate("/login");
-      
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
     } catch (err) {
-      show(err.message, "error");
+      const message = err.response?.data?.message || err.message || "Đăng ký thất bại";
+      show(message, "error");
     } finally {
       setSubmitting(false);
     }

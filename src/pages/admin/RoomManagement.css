@@ -1,0 +1,286 @@
+/* Room Management - Ant Design compatible styles */
+
+/* Custom overrides for Ant Design components */
+.ant-table-thead > tr > th {
+  background: #fafafa !important;
+  font-weight: 600 !important;
+  color: #262626 !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(24, 144, 255, 0.05) !important;
+}
+
+.ant-table-tbody > tr > td {
+  padding: 16px !important;
+  vertical-align: top !important;
+}
+
+/* Custom card styles */
+.room-management-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+}
+
+.room-management-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 16px 24px !important;
+}
+
+.room-management-card .ant-card-body {
+  padding: 24px !important;
+}
+
+/* Custom form styles */
+.room-form .ant-form-item-label > label {
+  font-weight: 600 !important;
+  color: #262626 !important;
+}
+
+.room-form .ant-input:focus,
+.room-form .ant-input-number:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Custom modal styles */
+.room-modal .ant-modal-content {
+  border-radius: 12px !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35) !important;
+}
+
+.room-modal .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 20px 24px !important;
+}
+
+.room-modal .ant-modal-body {
+  padding: 24px !important;
+}
+
+/* Custom button styles */
+.room-action-button {
+  margin-right: 8px !important;
+}
+
+.room-action-button:last-child {
+  margin-right: 0 !important;
+}
+
+/* Toggle button styles */
+.ant-btn[type="default"] {
+  border-color: #d9d9d9 !important;
+  color: #595959 !important;
+  background: #fff !important;
+}
+
+.ant-btn[type="default"]:hover {
+  border-color: #40a9ff !important;
+  color: #40a9ff !important;
+}
+
+.ant-btn[type="primary"] {
+  background: #1890ff !important;
+  border-color: #1890ff !important;
+  color: #fff !important;
+}
+
+.ant-btn[type="primary"]:hover {
+  background: #40a9ff !important;
+  border-color: #40a9ff !important;
+}
+
+/* Custom tag styles */
+.room-status-tag {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  padding: 2px 8px !important;
+}
+
+/* Custom search styles */
+.room-search .ant-input-search-button {
+  border-radius: 0 6px 6px 0 !important;
+}
+
+.room-search .ant-input {
+  border-radius: 6px 0 0 6px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .room-management-card .ant-card-body {
+    padding: 16px !important;
+  }
+  
+  .room-modal .ant-modal-body {
+    padding: 16px !important;
+  }
+  
+  .ant-table {
+    font-size: 12px !important;
+  }
+  
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px !important;
+  }
+}
+
+/* Animation classes */
+.room-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom table row hover effects */
+.ant-table-tbody > tr:hover > td {
+  background: rgba(24, 144, 255, 0.05) !important;
+  transition: background-color 0.3s ease !important;
+}
+
+/* Custom form item spacing */
+.room-form .ant-form-item {
+  margin-bottom: 24px !important;
+}
+
+.room-form .ant-form-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Custom input group styles */
+.room-form .ant-input-group-addon {
+  background: #fafafa !important;
+  border-color: #d9d9d9 !important;
+  color: #595959 !important;
+}
+
+/* Custom select styles */
+.room-form .ant-select-selector {
+  border-radius: 6px !important;
+}
+
+.room-form .ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Custom number input styles */
+.room-form .ant-input-number {
+  width: 100% !important;
+}
+
+.room-form .ant-input-number:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Custom divider styles */
+.room-form .ant-divider {
+  margin: 24px 0 !important;
+  border-color: #f0f0f0 !important;
+}
+
+/* Custom card header styles */
+.room-form .ant-card-head-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #262626 !important;
+}
+
+/* Custom button group styles */
+.room-form .ant-btn-group {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.room-form .ant-btn-group .ant-btn {
+  flex: 1 !important;
+}
+
+/* Custom space styles */
+.room-form .ant-space {
+  width: 100% !important;
+}
+
+.room-form .ant-space-item {
+  flex: 1 !important;
+}
+
+/* Custom row and col styles */
+.room-form .ant-row {
+  margin-bottom: 16px !important;
+}
+
+.room-form .ant-col {
+  padding: 0 8px !important;
+}
+
+/* Custom table pagination styles */
+.ant-pagination {
+  margin-top: 16px !important;
+  text-align: right !important;
+}
+
+.ant-pagination-item-active {
+  border-color: #1890ff !important;
+  background: #1890ff !important;
+}
+
+.ant-pagination-item-active a {
+  color: #fff !important;
+}
+
+/* Custom empty state styles */
+.ant-empty {
+  padding: 40px 0 !important;
+}
+
+.ant-empty-description {
+  color: #8c8c8c !important;
+}
+
+/* Custom loading styles */
+.ant-spin {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 40px 0 !important;
+}
+
+/* Custom tooltip styles */
+.ant-tooltip-inner {
+  background: rgba(0, 0, 0, 0.85) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+}
+
+/* Custom popconfirm styles */
+.ant-popover-inner {
+  border-radius: 8px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.ant-popover-title {
+  font-weight: 600 !important;
+  color: #262626 !important;
+}
+
+/* Custom message styles */
+.ant-message {
+  z-index: 1010 !important;
+}
+
+.ant-message-notice {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}

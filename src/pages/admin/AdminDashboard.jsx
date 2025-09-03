@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Layout,
   Menu,
@@ -43,8 +43,14 @@ const { Title, Text } = Typography;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedKey, setSelectedKey] = useState('rooms');
+  
+  // Lấy selectedKey từ URL parameter
+  const [selectedKey, setSelectedKey] = useState(() => {
+    return searchParams.get('menu') || 'rooms';
+  });
+  
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -116,6 +122,8 @@ const AdminDashboard = () => {
 
   const handleMenuClick = ({ key }) => {
     setSelectedKey(key);
+    // Cập nhật URL để giữ trạng thái
+    setSearchParams({ menu: key });
   };
 
   const getCurrentLabel = () => {

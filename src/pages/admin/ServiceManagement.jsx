@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { serviceService } from '../../utils/serviceService';
-import { useToast } from '../../components/common/Toast';
+import { useToast } from '../../components/common/useToast';
 import './ServiceManagement.css';
 
 const ServiceManagement = () => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useToast } from '../../components/common/useToast';
 import {
   Layout,
   Menu,
@@ -43,6 +44,7 @@ const { Title, Text } = Typography;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { show } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [collapsed, setCollapsed] = useState(false);
   
@@ -246,6 +248,7 @@ const AdminDashboard = () => {
       onClick: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        show('Đăng xuất thành công', 'success');
         navigate('/login');
       },
     },

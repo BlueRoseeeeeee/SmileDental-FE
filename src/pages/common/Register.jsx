@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import OtpInput from "../../components/common/OtpInput";
 import { normalizeVietnameseName, validateRegister } from "../../utils/validation";
-import { useToast } from "../../components/common/Toast";
+import { useToast } from "../../components/common/useToast";
 import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
 import Header from "../../components/common/Header";
@@ -51,15 +51,26 @@ function Register() {
   };
 
   const sendOtp = async () => {
-    if (!values.email) { setErrors((e)=>({...e,email:"Vui lòng nhập email"})); return; }
+    console.log("Send OTP clicked"); // Debug log
+    
+    if (!values.email) { 
+      setErrors((e)=>({...e,email:"Vui lòng nhập email"})); 
+      show("Vui lòng nhập email", "error");
+      return; 
+    }
     if (errors.email) return;
+    
+    console.log("Sending OTP to:", values.email); // Debug log
     setSendingOtp(true);
+    
     try {
-      await apiClient.post('/auth/send-otp-register', 
+      const response = await apiClient.post('/auth/send-otp-register', 
         { email: values.email }
       );
+      console.log("OTP sent successfully:", response); // Debug log
       show("Đã gửi OTP đến email", "success");
     } catch (err) {
+      console.log("OTP send error:", err); // Debug log
       const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
       show(message, "error");
     } finally {
@@ -128,7 +139,14 @@ function Register() {
             {errors.email && <div className="field__error">{errors.email}</div>}
           </div>
           <div className="field" style={{width:"20%", marginTop:28}}>
-            <button type="button" className="btn btn--primary" onClick={sendOtp} disabled={sendingOtp}>Gửi OTP</button>
+            <button 
+              type="button" 
+              className="btn btn--primary" 
+              onClick={sendOtp} 
+              disabled={sendingOtp}
+            >
+              {sendingOtp ? "Đang gửi..." : "Gửi OTP"}
+            </button>
           </div>
           </div>
           <div className={`field ${errors.otp ? "field--error" : ""}`}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useToast } from '../../components/common/Toast';
+import { useToast } from '../../components/common/useToast';
 import { apiClient } from '../../utils/axiosConfig';
 import './DoctorManagement.css';
 

@@ -34,8 +34,10 @@ apiClient.interceptors.response.use(
     // Xử lý lỗi 401 (Unauthorized) - token hết hạn
     if (error.response?.status === 401) {
       clearAuth();
-      // Có thể redirect về trang login ở đây
-      window.location.href = '/login';
+      // Chỉ redirect nếu không phải trang login (tránh redirect loop)
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     
     // Xử lý lỗi 403 (Forbidden) - không có quyền
@@ -83,7 +85,9 @@ roomApiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       clearAuth();
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -120,7 +124,9 @@ serviceApiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       clearAuth();
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -157,7 +163,9 @@ shiftApiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       clearAuth();
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

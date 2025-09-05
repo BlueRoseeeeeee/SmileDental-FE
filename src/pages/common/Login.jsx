@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useToast } from "../../components/common/Toast";
+import React, { useState, useEffect } from "react";
+import { useToast } from "../../components/common/useToast";
 import { validateLogin } from "../../utils/validation";
 import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
@@ -31,28 +31,59 @@ function Login() {
   const [values, setValues] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+
+  // Load saved email khi component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setValues(prev => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleBlur = () => setErrors((prev) => ({ ...prev, ...validateLogin(values) }));
   const handleChange = (e) => setValues((v) => ({ ...v, [e.target.name]: e.target.value }));
+  
+  const handleRememberMeChange = (e) => {
+    setRememberMe(e.target.checked);
+    if (!e.target.checked) {
+      // Nếu bỏ chọn remember me, xóa email đã lưu
+      localStorage.removeItem('rememberedEmail');
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
+    
     const cleaned = { email: values.email.trim(), password: values.password.trim() };
     const validation = validateLogin(cleaned);
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
+    
     setSubmitting(true);
+    
     try {
       const { data } = await apiClient.post('/auth/login', cleaned);
-
       setAuth({ accessToken: data.accessToken, user: data.user });
+      
+      // Lưu email nếu remember me được chọn
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', cleaned.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+      
       const role = getUserRole(data.user);
       show("Đăng nhập thành công", "success");
       navigate(roleToPath[role] || '/');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || "Đăng nhập thất bại";
+      const message = "Email hoặc mật khẩu không chính xác" || "Đăng nhập thất bại" || err.response?.data?.message || err.message;
       show(message, "error");
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -75,7 +106,23 @@ function Login() {
             <input type="password" name="password" className="field__input" value={values.password} onChange={handleChange} onBlur={handleBlur} />
             {errors.password && <div className="field__error">{errors.password}</div>}
           </div>
+          
+          {/* Remember Me checkbox */}
+          <div className="field field--checkbox">
+            <label className="checkbox">
+              <input 
+                type="checkbox" 
+                checked={rememberMe}
+                onChange={handleRememberMeChange}
+                className="checkbox__input"
+              />
+              <span className="checkbox__mark"></span>
+              <span className="checkbox__label">Ghi nhớ đăng nhập</span>
+            </label>
+          </div>
+          
           <button type="submit" className="btn btn--primary" disabled={submitting} >{submitting ? "Đang đăng nhập..." : "Đăng nhập"}</button>
+          
           <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10}} >
           <a href="/forgot-password">Quên mật khẩu?</a>
           </div>

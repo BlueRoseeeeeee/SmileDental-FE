@@ -29,7 +29,7 @@ import {
   TeamOutlined
 } from '@ant-design/icons';
 import { roomService } from '../../utils/roomService';
-import { useToast } from '../../components/common/Toast';
+import { useToast } from '../../components/common/useToast';
 
 const { Title, Text } = Typography;
 const { Search } = Input;

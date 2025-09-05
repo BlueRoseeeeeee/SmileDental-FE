@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useToast } from "../../components/common/Toast";
+import { useToast } from "../../components/common/useToast";
 import { validateReset } from "../../utils/validation";
 import "./Login.css";
 import authImg from "../../assets/image/hinh-anh-dang-nhap-dang-ki.png";
@@ -27,14 +27,25 @@ function ForgotPassword() {
   };
 
   const sendOtp = async () => {
-    if (!values.email) { setErrors((e)=>({...e,email:"Vui lòng nhập email"})); return; }
+    console.log("Send OTP clicked (ForgotPassword)"); // Debug log
+    
+    if (!values.email) { 
+      setErrors((e)=>({...e,email:"Vui lòng nhập email"})); 
+      show("Vui lòng nhập email", "error");
+      return; 
+    }
+    
+    console.log("Sending OTP to:", values.email); // Debug log
     setSendingOtp(true);
+    
     try {
-      await apiClient.post('/auth/send-otp-reset-password', 
+      const response = await apiClient.post('/auth/send-otp-reset-password', 
         { email: values.email }
       );
+      console.log("OTP sent successfully:", response); // Debug log
       show("Đã gửi OTP đến email", "success");
     } catch (err) {
+      console.log("OTP send error:", err); // Debug log
       const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
       show(message, "error");
     } finally {
@@ -77,7 +88,14 @@ function ForgotPassword() {
             {errors.email && <div className="field__error">{errors.email}</div>}
           </div>
           <div className="field" style={{marginTop:28}}>
-            <button type="button" className="btn btn--primary" onClick={sendOtp} disabled={sendingOtp}>Gửi OTP</button>
+            <button 
+              type="button" 
+              className="btn btn--primary" 
+              onClick={sendOtp} 
+              disabled={sendingOtp}
+            >
+              {sendingOtp ? "Đang gửi..." : "Gửi OTP"}
+            </button>
           </div>
           </div>
           <div className={`field ${errors.otp ? "field--error" : ""}`}>

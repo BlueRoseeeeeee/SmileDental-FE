@@ -177,19 +177,6 @@ const ShiftManagement = () => {
 
   return (
     <div className="shift-management">
-             <div className="card shift-header">
-         <h2>Quản lý ca làm việc</h2>
-         <div className="header-actions">
-           <span className="total-count">Tổng: {shifts.length} ca</span>
-           <button 
-             className="btn-primary"
-             onClick={() => setShowCreateForm(true)}
-           >
-             Tạo ca mới
-           </button>
-         </div>
-       </div>
-
       {showCreateForm && (
                  <div className="card form-section">
            <h3>{editingShift ? 'Cập nhật ca làm việc' : 'Tạo ca làm việc mới'}</h3>
@@ -360,6 +347,12 @@ const ShiftManagement = () => {
       )}
 
                <div className="card search-section">
+               <button 
+             className="btn-primary"
+             onClick={() => setShowCreateForm(true)}
+           >
+             Tạo ca mới
+           </button>
            <div className="search-box">
              <input 
                type="text" 

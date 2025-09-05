@@ -14,7 +14,6 @@ import {
   Col,
   Divider,
   Popconfirm,
-  message,
   Spin,
   Empty,
   Tooltip
@@ -341,15 +340,16 @@ const RoomManagement = () => {
           >
             Thêm phòng khám
           </Button>
-          <Col span={8}>
-            <Search
-              placeholder="Tìm kiếm phòng khám..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onSearch={handleSearch}
-              enterButton={<SearchOutlined />}
-            />
-          </Col>
+          <div className="search-box">
+          <input 
+            type="text" 
+            placeholder="Tìm kiếm phòng khám..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
+          />
+          <button className="btn-ghost" onClick={handleSearch}>Tìm kiếm</button>
+        </div>
         </Row>
 
         <Table

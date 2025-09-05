@@ -1,7 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  Table,
+  Button,
+  Input,
+  Modal,
+  Form,
+  InputNumber,
+  Space,
+  Tag,
+  Typography,
+  Row,
+  Col,
+  Divider,
+  Popconfirm,
+  Spin,
+  Empty,
+  Tooltip,
+  Checkbox
+} from 'antd';
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+  MedicineBoxOutlined,
+  DollarOutlined,
+  ClockCircleOutlined
+} from '@ant-design/icons';
 import { serviceService } from '../../utils/serviceService';
 import { useToast } from '../../components/common/useToast';
 import './ServiceManagement.css';
+
+const { Title, Text } = Typography;
+const { Search } = Input;
 
 const ServiceManagement = () => {
   const { show: showToast } = useToast();
@@ -10,141 +42,219 @@ const ServiceManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    type: '',
-    duration: '',
-    price: 0,
-    description: '',
-    requireExamFirst: false
+  const [form] = Form.useForm();
+  
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    current: 1,           // Trang hiện tại
+    pageSize: 10,         // Số items per page
+    total: 0,             // Tổng số items
+    showSizeChanger: true, // Cho phép thay đổi page size
+    showQuickJumper: true, // Cho phép nhảy nhanh đến trang
+    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} dịch vụ`,
+    pageSizeOptions: ['2','5','10'], // Các tùy chọn page size
   });
-
-  const [errors, setErrors] = useState({});
 
   useEffect(() => { fetchServices(); }, []);
 
-  const fetchServices = async () => {
+  const fetchServices = async (page = pagination.current, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
-      const data = await serviceService.list();
-      setServices(Array.isArray(data) ? data : (data?.data || []));
+      const data = await serviceService.list(page, pageSize);
+      setServices(data?.services || []);
+      setPagination(prev => ({
+        ...prev,
+        current: data?.page || page,
+        total: data?.total || 0,
+        pageSize: data?.limit || pageSize,
+      }));
     } catch (error) {
       console.error('Error fetching services:', error);
       showToast('Có lỗi xảy ra khi tải danh sách dịch vụ!', 'error');
     } finally { setLoading(false); }
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return fetchServices();
+  const handleSearch = async (page = 1, pageSize = pagination.pageSize) => {
+    if (!searchTerm.trim()) return fetchServices(page, pageSize);
     setLoading(true);
     try {
-      const data = await serviceService.search(searchTerm.trim());
-      setServices(Array.isArray(data) ? data : (data?.data || []));
+      const data = await serviceService.search(searchTerm.trim(), page, pageSize);
+      setServices(data?.services || []);
+      setPagination(prev => ({
+        ...prev,
+        current: data?.page || page,
+        total: data?.total || 0,
+        pageSize: data?.limit || pageSize,
+      }));
     } catch (error) {
       console.error('Error searching services:', error);
       showToast('Có lỗi xảy ra khi tìm kiếm dịch vụ!', 'error');
     } finally { setLoading(false); }
   };
 
-
+  // Xử lý thay đổi trang
+  const handleTableChange = (paginationInfo) => {
+    const { current, pageSize } = paginationInfo;
+    
+    // Cập nhật pagination state
+    setPagination(prev => ({
+      ...prev,
+      current,
+      pageSize,
+    }));
+    
+    // Gọi API với trang mới
+    if (searchTerm.trim()) {
+      handleSearch(current, pageSize);
+    } else {
+      fetchServices(current, pageSize);
+    }
+  };
 
   // Format tiền Việt Nam
   const formatCurrency = (value) => {
     if (!value) return '';
-    // Loại bỏ tất cả ký tự không phải số
-    const numericValue = value.toString().replace(/[^\d]/g, '');
-    if (!numericValue) return '';
-    // Format với dấu phẩy ngăn cách hàng nghìn
-    return new Intl.NumberFormat('vi-VN').format(parseInt(numericValue));
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(value);
   };
 
-  // Parse tiền từ format về số
-  const parseCurrency = (value) => {
-    if (!value) return '';
-    // Loại bỏ tất cả ký tự không phải số
-    return value.toString().replace(/[^\d]/g, '');
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
+
+  const columns = [
+    {
+      title: 'Tên dịch vụ',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name) => (
+        <Text>{name}</Text>
+      ),
+    },
+    {
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+      render: (text, record) => (
+        <div>
+          <Text>{text}</Text>
+        </div>
+      ),
+    },
+    ,
+    {
+      title: 'Loại',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => (
+        <Tag color="blue">
+          {type}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Thời gian',
+      dataIndex: 'duration',
+      key: 'duration',
+      render: (duration) => (
+        <Tag color="green" icon={<ClockCircleOutlined />}>
+          {duration} phút
+        </Tag>
+      ),
+    },
+    {
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      render: (price) => (
+        <Text strong style={{ color: '#52c41a' }}>
+          {formatCurrency(price)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'isActive',
+      key: 'status',
+      render: (isActive) => (
+        <Tag color={isActive ? 'success' : 'error'}>
+          {isActive ? 'Hoạt động' : 'Không hoạt động'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => date ? formatDate(date) : '-',
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Chỉnh sửa">
+            <Button 
+              type="text" 
+              icon={<EditOutlined />} 
+              onClick={() => handleEdit(record)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title={`Bạn có chắc chắn muốn ${record.isActive ? 'tạm ngưng' : 'kích hoạt'} dịch vụ này?`}
+            onConfirm={() => handleToggleServiceStatus(record._id, record.isActive)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Tooltip title={record.isActive ? 'Tạm ngưng' : 'Kích hoạt'}>
+              <Button 
+                type={record.isActive ? "default" : "primary"}
+                size="small"
+                style={{ 
+                  minWidth: '80px',
+                  borderRadius: '6px'
+                }}
+              >
+                {record.isActive ? 'Tạm ngưng' : 'Kích hoạt'}
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const handleEdit = (service) => {
+    setEditingService(service);
+    form.setFieldsValue({
+      name: service.name,
+      type: service.type,
+      duration: service.duration,
+      price: service.price,
+      description: service.description,
+      requireExamFirst: service.requireExamFirst
+    });
   };
 
-  // Validate form data
-  const validateField = (name, value) => {
-    const newErrors = { ...errors };
-    
-    switch (name) {
-      case 'duration':
-        if (!value) {
-          newErrors.duration = 'Thời gian không được để trống';
-        } else if (isNaN(value) || parseInt(value) <= 0) {
-          newErrors.duration = 'Thời gian phải là số lớn hơn 0';
-        } else {
-          delete newErrors.duration;
-        }
-        break;
-      case 'price': {
-        const priceValue = parseCurrency(value);
-        if (!priceValue) {
-          newErrors.price = 'Giá không được để trống';
-        } else if (parseInt(priceValue) < 0) {
-          newErrors.price = 'Giá phải là số lớn hơn hoặc bằng 0';
-        } else {
-          delete newErrors.price;
-        }
-        break;
-      }
-      case 'name':
-        if (!value.trim()) {
-          newErrors.name = 'Tên dịch vụ không được để trống';
-        } else {
-          delete newErrors.name;
-        }
-        break;
-      case 'type':
-        if (!value) {
-          newErrors.type = 'Vui lòng chọn loại dịch vụ';
-        } else {
-          delete newErrors.type;
-        }
-        break;
-      default:
-        break;
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleCancel = () => {
+    setShowCreateForm(false);
+    setEditingService(null);
+    form.resetFields();
   };
 
-  const handleCreateService = async (e) => {
-    e.preventDefault();
-    
-    // Validate tất cả fields
-    const isNameValid = validateField('name', formData.name);
-    const isTypeValid = validateField('type', formData.type);
-    const isDurationValid = validateField('duration', formData.duration);
-    const isPriceValid = validateField('price', formData.price);
-    
-    if (!isNameValid || !isTypeValid || !isDurationValid || !isPriceValid) {
-      showToast('Vui lòng kiểm tra lại thông tin!', 'error');
-      return;
-    }
-    
-         try {
-       await serviceService.create({
-         ...formData,
-         duration: parseInt(formData.duration),
-         price: parseInt(formData.price),
-         requireExamFirst: formData.requireExamFirst === 'true'
-       });
-      
-      setFormData({
-        name: '',
-        type: '',
-        duration: '',
-        price: 0,
-        description: '',
-        requireExamFirst: false
+  const handleCreateService = async (values) => {
+    try {
+      await serviceService.create({
+        ...values,
+        duration: parseInt(values.duration),
+        price: parseInt(values.price)
       });
-      setErrors({});
+      
+      form.resetFields();
       setShowCreateForm(false);
-      fetchServices();
+      // Reset về trang đầu tiên sau khi tạo mới
+      setPagination(prev => ({ ...prev, current: 1 }));
+      fetchServices(1, pagination.pageSize);
       showToast('Tạo dịch vụ thành công!', 'success');
     } catch (error) {
       console.error('Error creating service:', error);
@@ -152,39 +262,18 @@ const ServiceManagement = () => {
     }
   };
 
-  const handleUpdateService = async (e) => {
-    e.preventDefault();
-    
-    // Validate tất cả fields
-    const isNameValid = validateField('name', formData.name);
-    const isTypeValid = validateField('type', formData.type);
-    const isDurationValid = validateField('duration', formData.duration);
-    const isPriceValid = validateField('price', formData.price);
-    
-    if (!isNameValid || !isTypeValid || !isDurationValid || !isPriceValid) {
-      showToast('Vui lòng kiểm tra lại thông tin!', 'error');
-      return;
-    }
-    
-         try {
-       await serviceService.update(editingService._id, {
-         ...formData,
-         duration: parseInt(formData.duration),
-         price: parseInt(formData.price),
-         requireExamFirst: formData.requireExamFirst === 'true'
-       });
+  const handleUpdateService = async (values) => {
+    try {
+      await serviceService.update(editingService._id, {
+        ...values,
+        duration: parseInt(values.duration),
+        price: parseInt(values.price)
+      });
       
       setEditingService(null);
-      setFormData({
-        name: '',
-        type: '',
-        duration: '',
-        price: 0,
-        description: '',
-        requireExamFirst: false
-      });
-      setErrors({});
-      fetchServices();
+      form.resetFields();
+      // Giữ nguyên trang hiện tại sau khi cập nhật
+      fetchServices(pagination.current, pagination.pageSize);
       showToast('Cập nhật dịch vụ thành công!', 'success');
     } catch (error) {
       console.error('Error updating service:', error);
@@ -194,11 +283,11 @@ const ServiceManagement = () => {
 
   const handleToggleServiceStatus = async (serviceId, currentStatus) => {
     const action = currentStatus ? 'tạm ngưng' : 'kích hoạt';
-    if (!window.confirm(`Bạn có chắc chắn muốn ${action} dịch vụ này?`)) return;
     
     try {
       await serviceService.toggleStatus(serviceId);
-      fetchServices();
+      // Giữ nguyên trang hiện tại sau khi toggle status
+      fetchServices(pagination.current, pagination.pageSize);
       showToast(`${action.charAt(0).toUpperCase() + action.slice(1)} dịch vụ thành công!`, 'success');
     } catch (error) {
       console.error('Error toggling service status:', error);
@@ -206,309 +295,130 @@ const ServiceManagement = () => {
     }
   };
 
-  const handleEdit = (service) => {
-    setEditingService(service);
-    setFormData({
-      name: service.name,
-      type: service.type,
-      duration: service.duration,
-      price: service.price,
-      description: service.description,
-      requireExamFirst: service.requireExamFirst ? 'true' : 'false'
-    });
-  };
-
-  const handleCancel = () => {
-    setShowCreateForm(false);
-    setEditingService(null);
-    setFormData({
-      name: '',
-      type: '',
-      duration: '',
-      price: 0,
-      description: '',
-      requireExamFirst: false
-    });
-    setErrors({});
-  };
-
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
-  const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price);
-
   return (
-    <div className="service-management">
-
-      <div className="card search-section">
-      <div>
-        <button className="btn-create" onClick={() => setShowCreateForm(true)}>
-          + Thêm dịch vụ
-        </button>
-        </div>
-        <div className="search-box">
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm dịch vụ..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
-          />
-          <button className="btn-ghost" onClick={handleSearch}>Tìm kiếm</button>
-        </div>
-      </div>
-
-      {showCreateForm && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Thêm dịch vụ mới</h3>
-                         <form onSubmit={handleCreateService}>
-               <div className="form-section">
-                 <label className="label">Tên dịch vụ</label>
-                 <input 
-                   className={`control ${errors.name ? 'error' : ''}`}
-                   value={formData.name} 
-                   onChange={(e) => {
-                     setFormData({ ...formData, name: e.target.value });
-                     validateField('name', e.target.value);
-                   }}
-                   onBlur={(e) => validateField('name', e.target.value)}
-                   placeholder="Nhập tên dịch vụ"
-                   required 
-                 />
-                 {errors.name && <div className="error-message">{errors.name}</div>}
-               </div>
-
-               <div className="form-section">
-                 <label className="label">Loại dịch vụ</label>
-                 <select 
-                   className={`control ${errors.type ? 'error' : ''}`}
-                   value={formData.type} 
-                   onChange={(e) => {
-                     setFormData({ ...formData, type: e.target.value });
-                     validateField('type', e.target.value);
-                   }}
-                   onBlur={(e) => validateField('type', e.target.value)}
-                   required
-                 >
-                   <option value="">Chọn loại dịch vụ</option>
-                   <option value="exam">Khám</option>
-                   <option value="treatment">Điều trị</option>
-                 </select>
-                 {errors.type && <div className="error-message">{errors.type}</div>}
-               </div>
-
-               <div className="form-grid">
-                 <div>
-                   <label className="label">Thời gian (phút)</label>
-                   <input 
-                     type="number" 
-                     className={`control ${errors.duration ? 'error' : ''}`}
-                     value={formData.duration} 
-                     onChange={(e) => {
-                       setFormData({ ...formData, duration: e.target.value });
-                       validateField('duration', e.target.value);
-                     }}
-                     onBlur={(e) => validateField('duration', e.target.value)}
-                     placeholder="Nhập thời gian"
-                     required 
-                   />
-                   {errors.duration && <div className="error-message">{errors.duration}</div>}
-                 </div>
-                                   <div>
-                    <label className="label">Giá (VNĐ)</label>
-                    <input 
-                      type="text" 
-                      className={`control ${errors.price ? 'error' : ''}`}
-                      value={formatCurrency(formData.price)} 
-                      onChange={(e) => {
-                        const rawValue = parseCurrency(e.target.value);
-                        setFormData({ ...formData, price: rawValue });
-                        validateField('price', rawValue);
-                      }}
-                      onBlur={(e) => validateField('price', parseCurrency(e.target.value))}
-                      placeholder="Nhập giá (VD: 1,500,000)"
-                      required 
-                    />
-                    {errors.price && <div className="error-message">{errors.price}</div>}
-                  </div>
-               </div>
-
-              <div className="form-section">
-                <label className="label">Mô tả</label>
-                <textarea 
-                  className="control" 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-                  placeholder="Nhập mô tả dịch vụ"
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-section">
-                <label className="label">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requireExamFirst === 'true'} 
-                    onChange={(e) => setFormData({ ...formData, requireExamFirst: e.target.checked ? 'true' : 'false' })} 
-                  />
-                  Yêu cầu khám trước
-                </label>
-              </div>
-              
-              <div className="actions">
-                <button type="submit" className="btn btn-primary">Lưu</button>
-                <button type="button" className="btn btn-ghost" onClick={handleCancel}>Hủy</button>
-              </div>
-            </form>
+    <div>
+      <Card>
+        <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={() => setShowCreateForm(true)}
+          >
+            Thêm dịch vụ
+          </Button>
+          <div className="search-box">
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm dịch vụ theo tên" 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              onKeyDown={(e) => e.key === 'Enter' && (() => {
+                setPagination(prev => ({ ...prev, current: 1 }));
+                handleSearch(1, pagination.pageSize);
+              })()} 
+            />
+            <button className="btn-ghost" onClick={() => {
+              setPagination(prev => ({ ...prev, current: 1 }));
+              handleSearch(1, pagination.pageSize);
+            }}>Tìm kiếm</button>
           </div>
-        </div>
-      )}
+        </Row>
 
-      {editingService && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Cập nhật dịch vụ</h3>
-            <form onSubmit={handleUpdateService}>
-              <div className="form-section">
-                <label className="label">Tên dịch vụ</label>
-                <input 
-                  className="control" 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                  placeholder="Nhập tên dịch vụ"
-                  required 
-                />
-              </div>
+        <Table
+          columns={columns}
+          dataSource={services}
+          rowKey="_id"
+          loading={loading}
+          pagination={pagination}
+          onChange={handleTableChange}
+          locale={{
+            emptyText: <Empty description="Không có dịch vụ nào" />
+          }}
+        />
+      </Card>
 
-              <div className="form-section">
-                <label className="label">Loại dịch vụ</label>
-                <select 
-                  className="control" 
-                  value={formData.type} 
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  required
-                >
-                  <option value="exam">Khám</option>
-                  <option value="treatment">Điều trị</option>
-                </select>
-              </div>
+      <Modal
+        title={editingService ? 'Cập nhật dịch vụ' : 'Thêm dịch vụ mới'}
+        open={showCreateForm || !!editingService}
+        onCancel={handleCancel}
+        footer={null}
+        width={600}
+        destroyOnClose
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={editingService ? handleUpdateService : handleCreateService}
+          initialValues={{
+            name: '',
+            type: '',
+            duration: '',
+            price: 0,
+            description: '',
+            requireExamFirst: false
+          }}
+        >
+          <Form.Item
+            name="name"
+            label="Tên dịch vụ"
+            rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ!' }]}
+          >
+            <Input placeholder="Nhập tên dịch vụ" />
+          </Form.Item>
 
-              <div className="form-grid">
-                <div>
-                  <label className="label">Thời gian (phút)</label>
-                  <input 
-                    type="number" 
-                    className="control" 
-                    value={formData.duration} 
-                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })} 
-                    placeholder="Nhập thời gian"
-                    required 
-                  />
-                </div>
-                                 <div>
-                   <label className="label">Giá (VNĐ)</label>
-                   <input 
-                     type="text" 
-                     className="control" 
-                     value={formatCurrency(formData.price)} 
-                     onChange={(e) => {
-                       const rawValue = parseCurrency(e.target.value);
-                       setFormData({ ...formData, price: rawValue });
-                     }}
-                     placeholder="Nhập giá"
-                     required 
-                   />
-                 </div>
-              </div>
+          <Form.Item
+            name="type"
+            label="Loại dịch vụ"
+            rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ!' }]}
+          >
+            <Input placeholder="Nhập loại dịch vụ" />
+          </Form.Item>
 
-              <div className="form-section">
-                <label className="label">Mô tả</label>
-                <textarea 
-                  className="control" 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-                  placeholder="Nhập mô tả dịch vụ"
-                  rows="3"
-                />
-              </div>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="duration"
+                label="Thời gian (phút)"
+                rules={[{ required: true, message: 'Vui lòng nhập thời gian!' }]}
+              >
+                <InputNumber min={1} style={{ width: '100%' }} placeholder="Nhập thời gian" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="price"
+                label="Giá (VNĐ)"
+                rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
+              >
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="Nhập giá" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-              <div className="form-section">
-                <label className="label">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.requireExamFirst === 'true'} 
-                    onChange={(e) => setFormData({ ...formData, requireExamFirst: e.target.checked ? 'true' : 'false' })} 
-                  />
-                  Yêu cầu khám trước
-                </label>
-              </div>
-              
-              <div className="actions">
-                <button type="submit" className="btn btn-primary">Cập nhật</button>
-                <button type="button" className="btn btn-ghost" onClick={handleCancel}>Hủy</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <Form.Item
+            name="description"
+            label="Mô tả"
+          >
+            <Input.TextArea rows={3} placeholder="Nhập mô tả dịch vụ" />
+          </Form.Item>
 
-      <div className="services-table">
-        {loading ? (
-          <div className="loading">Đang tải...</div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Tên dịch vụ</th>
-                <th>Loại</th>
-                <th>Thời gian</th>
-                <th>Giá</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((service) => (
-                <tr key={service._id}>
-                  <td>
-                    <div className="service-name">{service.name}</div>
-                    {service.description && (
-                      <div className="service-description">{service.description}</div>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`service-type ${service.type}`}>
-                      {service.type === 'exam' ? 'Khám' : 'Điều trị'}
-                    </span>
-                  </td>
-                  <td>{service.duration} phút</td>
-                  <td>{formatPrice(service.price)} VNĐ</td>
-                  <td>
-                    <span className={`status ${service.isActive ? 'active' : 'inactive'}`}>
-                      {service.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                    </span>
-                  </td>
-                  <td>{service.createdAt ? formatDate(service.createdAt) : '-'}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button className="btn-ghost" onClick={() => handleEdit(service)}>
-                        Sửa
-                      </button>
-                      <button 
-                        className={`btn-ghost ${service.isActive ? 'btn-warning' : 'btn-success'}`}
-                        onClick={() => handleToggleServiceStatus(service._id, service.isActive)}
-                      >
-                        {service.isActive ? 'Tạm ngưng' : 'Kích hoạt'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+          <Form.Item
+            name="requireExamFirst"
+            valuePropName="checked"
+          >
+            <Checkbox>Yêu cầu khám trước</Checkbox>
+          </Form.Item>
 
+          <Form.Item style={{ marginTop: 24, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={handleCancel}>Hủy</Button>
+              <Button type="primary" htmlType="submit">
+                {editingService ? 'Cập nhật' : 'Tạo mới'}
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

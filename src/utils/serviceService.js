@@ -3,16 +3,16 @@ import { getAccessToken } from './auth';
 
 // Service quản lý dịch vụ
 export const serviceService = {
-  // Lấy danh sách dịch vụ
-  async list() {
-    const response = await serviceApiClient.get('/service');
+  // Lấy danh sách dịch vụ với phân trang
+  async list(page = 1, limit = 10) {
+    const response = await serviceApiClient.get(`/service?page=${page}&limit=${limit}`);
     return response.data;
   },
 
-  // Tìm kiếm dịch vụ
-  async search(keyword) {
+  // Tìm kiếm dịch vụ với phân trang
+  async search(keyword, page = 1, limit = 10) {
     const q = encodeURIComponent(keyword || '');
-    const response = await serviceApiClient.get(`/service/search?q=${q}`);
+    const response = await serviceApiClient.get(`/service/search?q=${q}&page=${page}&limit=${limit}`);
     return response.data;
   },
 

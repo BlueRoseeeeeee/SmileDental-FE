@@ -237,14 +237,13 @@ const ServiceManagement = () => {
 
   return (
     <div className="service-management">
-      <div className="card service-header">
-        <h2>Quản lý dịch vụ</h2>
+
+      <div className="card search-section">
+      <div>
         <button className="btn-create" onClick={() => setShowCreateForm(true)}>
           + Thêm dịch vụ
         </button>
-      </div>
-
-      <div className="card search-section">
+        </div>
         <div className="search-box">
           <input 
             type="text" 

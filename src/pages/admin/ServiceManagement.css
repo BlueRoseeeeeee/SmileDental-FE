@@ -13,18 +13,6 @@
   margin-bottom: 20px;
 }
 
-.service-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.service-header h2 {
-  margin: 0;
-  color: #333;
-  font-size: 24px;
-}
-
 .btn-create {
   background: #007bff;
   color: white;
@@ -43,11 +31,16 @@
 
 .search-section {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .search-box {
   display: flex;
   gap: 10px;
+  width: 50%;
 }
 
 .search-box input {

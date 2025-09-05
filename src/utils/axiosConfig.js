@@ -59,7 +59,7 @@ const roomApiClient = axios.create({
   baseURL: 'http://localhost:3002/api',
   headers: {
     'Accept': 'application/json',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   timeout: 10000
 });
@@ -71,6 +71,15 @@ roomApiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Thêm cache-busting parameter để tránh 304 Not Modified
+    if (config.method === 'get') {
+      config.params = {
+        ...config.params,
+        _t: Date.now() // Timestamp để force refresh
+      };
+    }
+    
     return config;
   },
   (error) => {

@@ -42,16 +42,33 @@ const RoomManagement = () => {
   const [editingRoom, setEditingRoom] = useState(null);
   const [form] = Form.useForm();
   const [subRoomsForm] = Form.useForm();
+  
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    current: 1,           // Trang hiện tại
+    pageSize: 10,         // Số items per page
+    total: 0,             // Tổng số items
+    showSizeChanger: true, // Cho phép thay đổi page size
+    showQuickJumper: true, // Cho phép nhảy nhanh đến trang
+    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} phòng khám`,
+    pageSizeOptions: ['2','5','10'], // Các tùy chọn page size
+  });
 
   useEffect(() => { 
     fetchRooms(); 
   }, []);
 
-  const fetchRooms = async () => {
+  const fetchRooms = async (page = pagination.current, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
-      const data = await roomService.list();
-      setRooms(Array.isArray(data) ? data : (data?.data || []));
+      const data = await roomService.list(page, pageSize);
+      setRooms(data?.rooms || []);
+      setPagination(prev => ({
+        ...prev,
+        current: data?.page || page,
+        total: data?.total || 0,
+        pageSize: data?.limit || pageSize,
+      }));
     } catch (error) {
       console.error('Error fetching rooms:', error);
       showToast('Có lỗi xảy ra khi tải danh sách phòng khám!', 'error');
@@ -60,12 +77,22 @@ const RoomManagement = () => {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return fetchRooms();
+  const handleSearch = async (page = 1, pageSize = pagination.pageSize) => {
+    if (!searchTerm.trim()) return fetchRooms(page, pageSize);
     setLoading(true);
     try {
-      const data = await roomService.search(searchTerm.trim());
-      setRooms(Array.isArray(data) ? data : (data?.data || []));
+      const data = await roomService.search(searchTerm.trim(), page, pageSize);
+      
+      // Xử lý dữ liệu phòng - dựa trên cấu trúc API thực tế
+      setRooms(data?.rooms || []);
+      
+      // Cập nhật thông tin phân trang
+      setPagination(prev => ({
+        ...prev,
+        current: data?.page || page,
+        total: data?.total || 0,
+        pageSize: data?.limit || pageSize,
+      }));
     } catch (error) {
       console.error('Error searching rooms:', error);
       showToast('Có lỗi xảy ra khi tìm kiếm phòng khám!', 'error');
@@ -90,7 +117,9 @@ const RoomManagement = () => {
       
       form.resetFields();
       setShowCreateForm(false);
-      fetchRooms();
+      // Reset về trang đầu tiên sau khi tạo mới
+      setPagination(prev => ({ ...prev, current: 1 }));
+      fetchRooms(1, pagination.pageSize);
       showToast('Tạo phòng khám thành công!', 'success');
     } catch (error) {
       console.error('Error creating room:', error);
@@ -114,7 +143,8 @@ const RoomManagement = () => {
       
       setEditingRoom(null);
       form.resetFields();
-      fetchRooms();
+      // Giữ nguyên trang hiện tại sau khi cập nhật
+      fetchRooms(pagination.current, pagination.pageSize);
       showToast('Cập nhật phòng khám thành công!', 'success');
     } catch (error) {
       console.error('Error updating room:', error);
@@ -127,7 +157,8 @@ const RoomManagement = () => {
     
     try {
       await roomService.toggleStatus(roomId);
-      fetchRooms();
+      // Giữ nguyên trang hiện tại sau khi toggle status
+      fetchRooms(pagination.current, pagination.pageSize);
       showToast(`${action.charAt(0).toUpperCase() + action.slice(1)} phòng khám thành công!`, 'success');
     } catch (error) {
       console.error('Error toggling room status:', error);
@@ -164,6 +195,25 @@ const RoomManagement = () => {
   };
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
+
+  // Xử lý thay đổi trang
+  const handleTableChange = (paginationInfo) => {
+    const { current, pageSize } = paginationInfo;
+    
+    // Cập nhật pagination state
+    setPagination(prev => ({
+      ...prev,
+      current,
+      pageSize,
+    }));
+    
+    // Gọi API với trang mới
+    if (searchTerm.trim()) {
+      handleSearch(current, pageSize);
+    } else {
+      fetchRooms(current, pageSize);
+    }
+  };
 
   const columns = [
     {
@@ -346,9 +396,15 @@ const RoomManagement = () => {
             placeholder="Tìm kiếm phòng khám..." 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
+            onKeyDown={(e) => e.key === 'Enter' && (() => {
+              setPagination(prev => ({ ...prev, current: 1 }));
+              handleSearch(1, pagination.pageSize);
+            })()} 
           />
-          <button className="btn-ghost" onClick={handleSearch}>Tìm kiếm</button>
+          <button className="btn-ghost" onClick={() => {
+            setPagination(prev => ({ ...prev, current: 1 }));
+            handleSearch(1, pagination.pageSize);
+          }}>Tìm kiếm</button>
         </div>
         </Row>
 
@@ -357,12 +413,8 @@ const RoomManagement = () => {
           dataSource={rooms}
           rowKey="_id"
           loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} phòng khám`,
-          }}
+          pagination={pagination}
+          onChange={handleTableChange}
           locale={{
             emptyText: <Empty description="Không có phòng khám nào" />
           }}

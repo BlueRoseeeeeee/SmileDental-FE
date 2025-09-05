@@ -3,16 +3,16 @@ import { getAccessToken } from './auth';
 
 // Service quản lý phòng khám
 export const roomService = {
-  // Lấy danh sách phòng
-  async list() {
-    const response = await roomApiClient.get('/room');
+  // Lấy danh sách phòng với phân trang
+  async list(page = 1, limit = 10) {
+    const response = await roomApiClient.get(`/room?page=${page}&limit=${limit}`);
     return response.data;
   },
 
-  // Tìm kiếm phòng
-  async search(keyword) {
+  // Tìm kiếm phòng với phân trang
+  async search(keyword, page = 1, limit = 10) {
     const q = encodeURIComponent(keyword || '');
-    const response = await roomApiClient.get(`/room/search?q=${q}`);
+    const response = await roomApiClient.get(`/room/search?q=${q}&page=${page}&limit=${limit}`);
     return response.data;
   },
 

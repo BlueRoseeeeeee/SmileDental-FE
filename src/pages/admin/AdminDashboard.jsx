@@ -34,8 +34,6 @@ import {
 } from '@ant-design/icons';
 import RoomManagement from './RoomManagement';
 import ServiceManagement from './ServiceManagement';
-import DoctorManagement from './DoctorManagement';
-import NurseManagement from './NurseManagement';
 import ShiftManagement from './ShiftManagement';
 import './AdminDashboard.css';
 
@@ -74,14 +72,9 @@ const AdminDashboard = () => {
       label: 'Quản lý dịch vụ',
     },
     {
-      key: 'doctors',
+      key: 'staff',
       icon: <UserOutlined />,
-      label: 'Quản lý nha sĩ',
-    },
-    {
-      key: 'nurses',
-      icon: <TeamOutlined />,
-      label: 'Quản lý y tá',
+      label: 'Quản lý nhân viên',
     },
     {
       key: 'schedule',
@@ -157,10 +150,6 @@ const AdminDashboard = () => {
         return <RoomManagement />;
       case 'services':
         return <ServiceManagement />;
-      case 'doctors':
-        return <DoctorManagement />;
-      case 'nurses':
-        return <NurseManagement />;
       case 'shift-management':
         return <ShiftManagement />;
       case 'schedule-management':

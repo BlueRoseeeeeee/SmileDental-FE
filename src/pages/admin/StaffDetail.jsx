@@ -176,7 +176,6 @@ const StaffDetail = () => {
 
         {/* Staff Information */}
         <Row gutter={[24, 24]}>
-          {/* Avatar and Basic Info */}
           <Col xs={24} md={8}>
             <Card style={{ textAlign: 'center' }}>
               <Avatar 
@@ -190,10 +189,6 @@ const StaffDetail = () => {
               <Text type="secondary" style={{ fontSize: '16px' }}>
                 {staff.email}
               </Text>
-              <br />
-              <Tag color={roleInfo.color} style={{ marginTop: 8, fontSize: '14px' }}>
-                {roleInfo.label}
-              </Tag>
             </Card>
           </Col>
 
@@ -273,11 +268,6 @@ const StaffDetail = () => {
                   <Text strong>Ngày tạo:</Text>
                   <br />
                   <Text style={{ fontSize: '16px' }}>{formatDate(staff.createdAt)}</Text>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Text strong>ID:</Text>
-                  <br />
-                  <Text code style={{ fontSize: '12px' }}>{staff._id}</Text>
                 </Col>
               </Row>
             </Card>

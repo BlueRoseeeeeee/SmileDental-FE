@@ -39,7 +39,7 @@ const StaffManagement = () => {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('');
+  const [selectedRole, setSelectedRole] = useState(undefined);
   
   const [pagination, setPagination] = useState({
     current: 1,
@@ -63,7 +63,7 @@ const StaffManagement = () => {
   /**
    * Fetch staff data from API
    */
-  const fetchStaff = async (page = 1, pageSize = 10, role = '', search = '') => {
+  const fetchStaff = async (page = 1, pageSize = 10, role = undefined, search = '') => {
     setLoading(true);
     try {
       let response;
@@ -98,49 +98,32 @@ const StaffManagement = () => {
     fetchStaff(1, pagination.pageSize, selectedRole, searchTerm);
   };
 
-  /**
-   * Handle table pagination change
-   */
   const handleTableChange = (paginationInfo) => {
     const { current, pageSize } = paginationInfo;
     setPagination(prev => ({ ...prev, current, pageSize }));
     fetchStaff(current, pageSize, selectedRole, searchTerm);
   };
 
-  /**
-   * Handle role filter change
-   */
   const handleRoleChange = (role) => {
     setSelectedRole(role);
     setPagination(prev => ({ ...prev, current: 1 }));
     fetchStaff(1, pagination.pageSize, role, searchTerm);
   };
 
-  /**
-   * Handle refresh data
-   */
+
   const handleRefresh = () => {
     fetchStaff(pagination.current, pagination.pageSize, selectedRole, searchTerm);
   };
 
-  /**
-   * Handle view staff details
-   */
   const handleViewStaff = (id) => {
     navigate(`/admin/staff/detail/${id}`);
   };
 
-  /**
-   * Handle edit staff
-   */
+
   const handleEditStaff = (id) => {
     navigate(`/admin/staff/edit/${id}`);
   };
 
-
-  /**
-   * Get role display info
-   */
   const getRoleInfo = (role) => {
     return roleOptions.find(option => option.value === role) || 
            { value: role, label: role, color: 'default' };

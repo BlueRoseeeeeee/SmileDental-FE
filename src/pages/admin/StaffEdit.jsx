@@ -97,12 +97,8 @@ const StaffEdit = () => {
       setSaving(false);
     }
   };
-
-  /**
-   * Handle cancel
-   */
   const handleCancel = () => {
-    navigate(`/admin/staff/detail/${id}`);
+    navigate(-1);
   };
 
   useEffect(() => {

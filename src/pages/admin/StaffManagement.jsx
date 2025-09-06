@@ -187,10 +187,8 @@ const StaffManagement = () => {
       key: 'type',
       render: (type) => {
         const typeMap = {
-          'fulltime': { label: 'Toàn thời gian', color: 'purple' },
-          'parttime': { label: 'Bán thời gian', color: 'orange' },
-          'normal': { label: 'Thường', color: 'pink' },
-          'null': { label: 'Không xác định', color: 'default' }
+          'fullTime': { label: 'Toàn thời gian', color: 'purple' },
+          'parTime': { label: 'Bán thời gian', color: 'orange' }
         };
         const typeInfo = typeMap[type] || { label: type, color: 'default' };
         return <Tag color={typeInfo.color}>{typeInfo.label}</Tag>;

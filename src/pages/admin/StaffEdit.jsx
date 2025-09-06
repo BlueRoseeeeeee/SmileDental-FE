@@ -232,9 +232,8 @@ const StaffEdit = () => {
                 rules={[{ required: true, message: 'Vui lòng chọn loại' }]}
               >
                 <Select placeholder="Chọn loại" size="large">
-                  <Option value="fulltime">Toàn thời gian</Option>
-                  <Option value="parttime">Bán thời gian</Option>
-                  <Option value="normal">Thường</Option>
+                  <Option value="fullTime">Toàn thời gian</Option>
+                  <Option value="partTime">Bán thời gian</Option>
                 </Select>
               </Form.Item>
             </Col>

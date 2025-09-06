@@ -42,10 +42,8 @@ function ForgotPassword() {
       const response = await apiClient.post('/auth/send-otp-reset-password', 
         { email: values.email }
       );
-      console.log("OTP sent successfully:", response); // Debug log
       show("Đã gửi OTP đến email", "success");
     } catch (err) {
-      console.log("OTP send error:", err); // Debug log
       const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
       show(message, "error");
     } finally {

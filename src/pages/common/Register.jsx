@@ -50,27 +50,21 @@ function Register() {
     setErrors(validateRegister(newValues));
   };
 
-  const sendOtp = async () => {
-    console.log("Send OTP clicked"); // Debug log
-    
+  const sendOtp = async () => {    
     if (!values.email) { 
       setErrors((e)=>({...e,email:"Vui lòng nhập email"})); 
       show("Vui lòng nhập email", "error");
       return; 
     }
     if (errors.email) return;
-    
-    console.log("Sending OTP to:", values.email); // Debug log
     setSendingOtp(true);
     
     try {
       const response = await apiClient.post('/auth/send-otp-register', 
         { email: values.email }
       );
-      console.log("OTP sent successfully:", response); // Debug log
-      show("Đã gửi OTP đến email", "success");
+      show("Đã gửi OTP đến email. Vui lòng kiểm tra email.", "success");
     } catch (err) {
-      console.log("OTP send error:", err); // Debug log
       const message = err.response?.data?.message || err.message || "Gửi OTP thất bại";
       show(message, "error");
     } finally {

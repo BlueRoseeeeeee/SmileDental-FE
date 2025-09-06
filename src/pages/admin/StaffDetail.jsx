@@ -88,10 +88,8 @@ const StaffDetail = () => {
    */
   const getTypeInfo = (type) => {
     const typeMap = {
-      'fulltime': { label: 'Toàn thời gian', color: 'purple' },
-      'parttime': { label: 'Bán thời gian', color: 'orange' },
-      'normal': { label: 'Thường', color: 'pink' },
-      'null': { label: 'Không xác định', color: 'default' }
+      'fullTime': { label: 'Toàn thời gian', color: 'purple' },
+      'partTime': { label: 'Bán thời gian', color: 'orange' },
     };
     return typeMap[type] || { label: type, color: 'default' };
   };

@@ -79,7 +79,7 @@ function Login() {
       show("Đăng nhập thành công", "success");
       navigate(roleToPath[role] || '/');
     } catch (err) {
-      const message = "Email hoặc mật khẩu không chính xác" || "Đăng nhập thất bại" || err.response?.data?.message || err.message;
+      const message =err.response?.data?.message || err.message||"Email hoặc mật khẩu không chính xác" || "Đăng nhập thất bại" ;
       show(message, "error");
     } finally {
       setSubmitting(false);

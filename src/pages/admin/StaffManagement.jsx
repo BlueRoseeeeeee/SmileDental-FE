@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   Table,
@@ -32,6 +33,9 @@ const { Option } = Select;
 
 const StaffManagement = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
+  
+  // State management
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,11 +63,13 @@ const StaffManagement = () => {
   /**
    * Fetch staff data from API
    */
-  const fetchStaff = async (page = 1, pageSize = 10, role = '') => {
+  const fetchStaff = async (page = 1, pageSize = 10, role = '', search = '') => {
     setLoading(true);
     try {
       let response;
-      if (role) {
+      if (search) {
+        response = await staffService.search(search, page, pageSize);
+      } else if (role) {
         response = await staffService.searchByRole(role, page, pageSize);
       } else {
         response = await staffService.list(page, pageSize);
@@ -85,11 +91,11 @@ const StaffManagement = () => {
   };
 
   /**
-   * Handle search by role
+   * Handle search by name/email
    */
   const handleSearch = () => {
     setPagination(prev => ({ ...prev, current: 1 }));
-    fetchStaff(1, pagination.pageSize, selectedRole);
+    fetchStaff(1, pagination.pageSize, selectedRole, searchTerm);
   };
 
   /**
@@ -98,7 +104,7 @@ const StaffManagement = () => {
   const handleTableChange = (paginationInfo) => {
     const { current, pageSize } = paginationInfo;
     setPagination(prev => ({ ...prev, current, pageSize }));
-    fetchStaff(current, pageSize, selectedRole);
+    fetchStaff(current, pageSize, selectedRole, searchTerm);
   };
 
   /**
@@ -107,14 +113,28 @@ const StaffManagement = () => {
   const handleRoleChange = (role) => {
     setSelectedRole(role);
     setPagination(prev => ({ ...prev, current: 1 }));
-    fetchStaff(1, pagination.pageSize, role);
+    fetchStaff(1, pagination.pageSize, role, searchTerm);
   };
 
   /**
    * Handle refresh data
    */
   const handleRefresh = () => {
-    fetchStaff(pagination.current, pagination.pageSize, selectedRole);
+    fetchStaff(pagination.current, pagination.pageSize, selectedRole, searchTerm);
+  };
+
+  /**
+   * Handle view staff details
+   */
+  const handleViewStaff = (id) => {
+    navigate(`/admin/staff/detail/${id}`);
+  };
+
+  /**
+   * Handle edit staff
+   */
+  const handleEditStaff = (id) => {
+    navigate(`/admin/staff/edit/${id}`);
   };
 
 
@@ -239,6 +259,7 @@ const StaffManagement = () => {
               type="text" 
               icon={<EyeOutlined />} 
               size="small"
+              onClick={() => handleViewStaff(record._id)}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
@@ -246,6 +267,7 @@ const StaffManagement = () => {
               type="text" 
               icon={<EditOutlined />} 
               size="small"
+              onClick={() => handleEditStaff(record._id)}
             />
           </Tooltip>
         </Space>
@@ -262,7 +284,7 @@ const StaffManagement = () => {
       <Card>
         {/* Search and Filter Section */}
         <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col xs={24} sm={12} md={8}>
+          <Col xs={24} sm={12} md={6}>
             <Select
               placeholder="Lọc theo vai trò"
               value={selectedRole}
@@ -279,6 +301,43 @@ const StaffManagement = () => {
                 </Option>
               ))}
             </Select>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Input
+              placeholder="Tìm kiếm theo tên hoặc email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
+              suffix={<SearchOutlined />}
+              size="large"
+            />
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Button 
+              type="primary" 
+              icon={<SearchOutlined />} 
+              onClick={handleSearch}
+              style={{ width: '100%' }}
+              size="large"
+            >
+              Tìm kiếm
+            </Button>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Button 
+              type="default" 
+              icon={<ReloadOutlined />} 
+              onClick={handleRefresh}
+              loading={loading}
+              style={{ width: '100%' }}
+              size="large"
+            >
+              Làm mới
+            </Button>
           </Col>
         </Row>
 

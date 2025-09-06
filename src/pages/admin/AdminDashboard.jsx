@@ -35,6 +35,7 @@ import {
 import RoomManagement from './RoomManagement';
 import ServiceManagement from './ServiceManagement';
 import ShiftManagement from './ShiftManagement';
+import StaffManagement from './StaffManagement';
 import './AdminDashboard.css';
 
 const { Header, Sider, Content } = Layout;
@@ -150,6 +151,8 @@ const AdminDashboard = () => {
         return <RoomManagement />;
       case 'services':
         return <ServiceManagement />;
+      case 'staff':
+          return <StaffManagement />;
       case 'shift-management':
         return <ShiftManagement />;
       case 'schedule-management':

@@ -80,7 +80,7 @@ export function ToastProvider({ children }) {
 
     // Thời gian tự động đóng toast theo loại
     const autoCloseTimes = {
-      error: 10000,   
+      error: 8000,   
       warning: 8000, 
       success: 4000,  
       info: 10000     

@@ -1,0 +1,19 @@
+/* Staff Management Styles */
+
+.ant-select-dropdown .ant-select-item-option:hover {
+  background-color: #1890ff !important;
+  color: white !important;
+}
+
+.ant-select-dropdown .ant-select-item-option:hover span {
+  color: white !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected span {
+  color: #1890ff !important;
+}

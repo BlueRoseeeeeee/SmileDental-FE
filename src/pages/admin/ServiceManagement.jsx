@@ -17,7 +17,8 @@ import {
   Spin,
   Empty,
   Tooltip,
-  Checkbox
+  Checkbox,
+  Select
 } from 'antd';
 import {
   PlusOutlined,
@@ -34,6 +35,7 @@ import './ServiceManagement.css';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
+const { Option } = Select;
 
 const ServiceManagement = () => {
   const { show: showToast } = useToast();
@@ -43,6 +45,12 @@ const ServiceManagement = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [form] = Form.useForm();
+  
+  // Service type options
+  const serviceTypeOptions = [
+    { value: 'exam', label: 'Khám' },
+    { value: 'treatment', label: 'Điều trị' }
+  ];
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -120,7 +128,14 @@ const ServiceManagement = () => {
     }).format(value);
   };
 
+
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
+
+  // Formatter cho số tiền VNĐ
+  const formatVND = (value) => {
+    if (!value) return '';
+    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
 
   const columns = [
     {
@@ -135,9 +150,11 @@ const ServiceManagement = () => {
       title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
+      width: 200, // Đặt chiều rộng cố định
+      ellipsis: true, // Cắt ngắn text dài
       render: (text, record) => (
         <div>
-          <Text>{text}</Text>
+          <Text ellipsis={{ tooltip: text }}>{text}</Text>
         </div>
       ),
     },
@@ -146,11 +163,14 @@ const ServiceManagement = () => {
       title: 'Loại',
       dataIndex: 'type',
       key: 'type',
-      render: (type) => (
-        <Tag color="blue">
-          {type}
-        </Tag>
-      ),
+      render: (type) => {
+        const typeOption = serviceTypeOptions.find(option => option.value === type);
+        return (
+          <Tag color={type === 'exam' ? 'green' : 'blue'}>
+            {typeOption ? typeOption.label : type}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Thời gian',
@@ -243,8 +263,8 @@ const ServiceManagement = () => {
   };
 
   const handleCreateService = async (values) => {
-    try {
-      await serviceService.create({
+         try {
+       await serviceService.create({
         ...values,
         duration: parseInt(values.duration),
         price: parseInt(values.price)
@@ -263,12 +283,12 @@ const ServiceManagement = () => {
   };
 
   const handleUpdateService = async (values) => {
-    try {
-      await serviceService.update(editingService._id, {
+         try {
+       await serviceService.update(editingService._id, {
         ...values,
         duration: parseInt(values.duration),
         price: parseInt(values.price)
-      });
+       });
       
       setEditingService(null);
       form.resetFields();
@@ -351,7 +371,7 @@ const ServiceManagement = () => {
           onFinish={editingService ? handleUpdateService : handleCreateService}
           initialValues={{
             name: '',
-            type: '',
+            type: 'exam',
             duration: '',
             price: 0,
             description: '',
@@ -371,7 +391,13 @@ const ServiceManagement = () => {
             label="Loại dịch vụ"
             rules={[{ required: true, message: 'Vui lòng chọn loại dịch vụ!' }]}
           >
-            <Input placeholder="Nhập loại dịch vụ" />
+            <Select placeholder="Chọn loại dịch vụ" size="large">
+              {serviceTypeOptions.map(option => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Row gutter={16}>
@@ -387,10 +413,16 @@ const ServiceManagement = () => {
             <Col span={12}>
               <Form.Item
                 name="price"
-                label="Giá (VNĐ)"
+                label="Giá"
                 rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
               >
-                <InputNumber min={0} style={{ width: '100%' }} placeholder="Nhập giá" />
+                <InputNumber 
+                  min={0} 
+                  style={{ width: '100%' }} 
+                  placeholder="Nhập giá"
+                  formatter={formatVND}
+                  addonAfter="VNĐ"
+                />
               </Form.Item>
             </Col>
           </Row>

@@ -32,29 +32,20 @@ const RoomEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showToast } = useToast();
+  const { show: showToast } = useToast();
   const [form] = Form.useForm();
-  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [room, setRoom] = useState(null);
 
-  /**
-   * Fetch room details for editing
-   */
   const fetchRoomDetails = async () => {
     setLoading(true);
     try {
       let roomData;
-      
-      // First, try to get data from navigation state (faster)
       if (location.state?.roomData) {
-        console.log('Using room data from navigation state:', location.state.roomData);
         roomData = location.state.roomData;
       } else {
-        // Fallback: find from the rooms list
-        console.log('No navigation state, searching in rooms list...');
-        const roomsResponse = await roomService.list(1, 1000); // Get all rooms
+        const roomsResponse = await roomService.list(1, 1000);
         const foundRoom = roomsResponse.rooms?.find(room => room._id === id);
         if (!foundRoom) {
           throw new Error('Không tìm thấy phòng khám với ID này');
@@ -70,9 +61,7 @@ const RoomEdit = () => {
         subRooms: roomData.subRooms?.length > 0 ? roomData.subRooms : []
       });
     } catch (error) {
-      console.error('Error fetching room details:', error);
       showToast('Lỗi khi tải thông tin phòng khám', 'error');
-      navigate('/admin?menu=rooms');
     } finally {
       setLoading(false);
     }
@@ -95,11 +84,10 @@ const RoomEdit = () => {
         name: values.name,
         subRooms: validSubRooms
       });
-      
+      console.log('Cập nhật phòng khám thành công');
       showToast('Cập nhật phòng khám thành công', 'success');
-      navigate('/admin?menu=rooms');
+      navigate(-1);
     } catch (error) {
-      console.error('Error updating room:', error);
       showToast('Lỗi khi cập nhật phòng khám', 'error');
     } finally {
       setSaving(false);
@@ -259,7 +247,6 @@ const RoomEdit = () => {
           </Col>
         </Row>
 
-        {/* Edit Form */}
         <Form
           form={form}
           layout="vertical"

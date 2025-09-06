@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   Table,
@@ -35,13 +36,12 @@ const { Search } = Input;
 
 const RoomManagement = () => {
   const { show: showToast } = useToast();
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingRoom, setEditingRoom] = useState(null);
   const [form] = Form.useForm();
-  const [subRoomsForm] = Form.useForm();
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -127,30 +127,6 @@ const RoomManagement = () => {
     }
   };
 
-  const handleUpdateRoom = async (values) => {
-    try {
-      const validSubRooms = values.subRooms
-        .map((subRoom, index) => ({
-          ...subRoom,
-          name: subRoom.name.trim() || `Ghế ${index + 1}`
-        }))
-        .filter(subRoom => subRoom.maxDoctors > 0 && subRoom.maxNurses > 0);
-      
-      await roomService.update(editingRoom._id, {
-        name: values.name,
-        subRooms: validSubRooms
-      });
-      
-      setEditingRoom(null);
-      form.resetFields();
-      // Giữ nguyên trang hiện tại sau khi cập nhật
-      fetchRooms(pagination.current, pagination.pageSize);
-      showToast('Cập nhật phòng khám thành công!', 'success');
-    } catch (error) {
-      console.error('Error updating room:', error);
-      showToast(error.message || 'Có lỗi xảy ra khi cập nhật phòng khám!', 'error');
-    }
-  };
 
   const handleToggleRoomStatus = async (roomId, currentStatus) => {
     const action = currentStatus ? 'tạm ngưng' : 'kích hoạt';
@@ -167,16 +143,13 @@ const RoomManagement = () => {
   };
 
   const handleEdit = (room) => {
-    setEditingRoom(room);
-    form.setFieldsValue({
-      name: room.name,
-      subRooms: room.subRooms?.length > 0 ? room.subRooms : []
+    navigate(`/admin/room/edit/${room._id}`, { 
+      state: { roomData: room } 
     });
   };
 
   const handleCancel = () => {
     setShowCreateForm(false);
-    setEditingRoom(null);
     form.resetFields();
   };
 
@@ -422,8 +395,8 @@ const RoomManagement = () => {
       </Card>
 
       <Modal
-        title={editingRoom ? 'Cập nhật phòng khám' : 'Thêm phòng khám mới'}
-        open={showCreateForm || !!editingRoom}
+        title="Thêm phòng khám mới"
+        open={showCreateForm}
         onCancel={handleCancel}
         footer={null}
         width={800}
@@ -432,7 +405,7 @@ const RoomManagement = () => {
         <Form
           form={form}
           layout="vertical"
-          onFinish={editingRoom ? handleUpdateRoom : handleCreateRoom}
+          onFinish={handleCreateRoom}
           initialValues={{
             name: '',
             subRooms: []
@@ -454,7 +427,7 @@ const RoomManagement = () => {
             <Space>
               <Button onClick={handleCancel}>Hủy</Button>
               <Button type="primary" htmlType="submit">
-                {editingRoom ? 'Cập nhật' : 'Tạo mới'}
+                Tạo mới
               </Button>
             </Space>
           </Form.Item>

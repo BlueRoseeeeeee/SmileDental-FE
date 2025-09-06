@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import StaffManagement from "./pages/admin/StaffManagement";
 import StaffDetail from "./pages/admin/StaffDetail";
 import StaffEdit from "./pages/admin/StaffEdit";
+import RoomEdit from "./pages/admin/RoomEdit";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/admin/staff" element={<StaffManagement />} />
           <Route path="/admin/staff/detail/:id" element={<StaffDetail />} />
           <Route path="/admin/staff/edit/:id" element={<StaffEdit />} />
+          <Route path="/admin/room/edit/:id" element={<RoomEdit />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
